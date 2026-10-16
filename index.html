@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Roadster Rocket – Flying Car</title>
+<style>body{margin:0;overflow:hidden;background:#000;font-family:sans-serif;touch-action:none;user-select:none}
+#hud{position:fixed;left:12px;top:12px;color:#fff;background:#0009;padding:10px 14px;border-radius:8px;font-size:14px;line-height:1.6;pointer-events:none}
+#hp{width:120px;height:6px;background:#333;border-radius:3px}#hp i{display:block;height:100%;background:#3f8;border-radius:3px}
+#help{position:fixed;right:12px;top:12px;color:#ddd;background:#0008;padding:8px 12px;border-radius:8px;font-size:12px}
+#flash{position:fixed;inset:0;background:#f00;opacity:0;pointer-events:none;transition:opacity .3s}
+#joy{position:fixed;left:30px;bottom:30px;width:140px;height:140px;border-radius:50%;background:#fff2;border:2px solid #fff5;display:none}
+#knob{position:absolute;left:45px;top:45px;width:50px;height:50px;border-radius:50%;background:#fff8}
+#btns{position:fixed;right:24px;bottom:30px;display:none;flex-direction:column;gap:12px}
+#btns button{width:70px;height:56px;border-radius:12px;border:2px solid #fff6;background:#0007;color:#fff;font-size:15px}
+.touch #joy{display:block}.touch #btns{display:flex}.touch #help{display:none}</style>
+<script type="importmap">{"imports":{"three":"./three.module.js","three/addons/":"./jsm/"}}</script></head>
+<body><div id="hud"></div><div id="flash"></div>
+<div id="help">WASD 驾驶/转向 · F 飞行 · Space 上升 · Shift 下降 · C 镜头 · R 重置</div>
+<div id="joy"><div id="knob"></div></div>
+<div id="btns"><button data-k="Space">▲ 上升</button><button data-k="ShiftLeft">▼ 下降</button><button id="bf">✈ 飞行</button><button id="bc">🎥</button></div>
+<script type="module" src="game.js"></script></body></html>
