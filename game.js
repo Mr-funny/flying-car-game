@@ -152,7 +152,9 @@ const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.35,.4
 // ---------- input ----------
 const keys={};let flight=false,camMode=0;
 const toggleF=()=>flight=!flight,toggleC=()=>camMode=(camMode+1)%3;
-addEventListener('keydown',e=>{keys[e.code]=true;if(e.repeat)return;if(e.code=='KeyF')toggleF();if(e.code=='KeyC')toggleC();if(e.code=='KeyR')reset()});addEventListener('keyup',e=>keys[e.code]=false);
+const PREV=['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+addEventListener('keydown',e=>{if(PREV.includes(e.code))e.preventDefault();keys[e.code]=true;if(e.code=='Space'&&!flight)flight=true;if(e.repeat)return;if(e.code=='KeyF')toggleF();if(e.code=='KeyC')toggleC();if(e.code=='KeyR')reset()});addEventListener('keyup',e=>keys[e.code]=false);addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
+let orbY=0,orbP=0,dragId=null,dx0=0,dy0=0;renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType=='touch'&&document.body.classList.contains('touch')&&false)return;dragId=e.pointerId;dx0=e.clientX;dy0=e.clientY;renderer.domElement.setPointerCapture(dragId)});renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId!==dragId)return;orbY-=(e.clientX-dx0)*.006;orbP=THREE.MathUtils.clamp(orbP+(e.clientY-dy0)*.004,-.4,1.2);dx0=e.clientX;dy0=e.clientY});const dEnd=()=>dragId=null;renderer.domElement.addEventListener('pointerup',dEnd);renderer.domElement.addEventListener('pointercancel',dEnd);renderer.domElement.addEventListener('dblclick',()=>{orbY=orbP=0});
 const joy={x:0,y:0};
 if('ontouchstart' in window||navigator.maxTouchPoints>0)document.body.classList.add('touch');
 const jEl=document.getElementById('joy'),knob=document.getElementById('knob');let jid=null;
@@ -165,18 +167,18 @@ document.getElementById('bf').onpointerdown=toggleF;document.getElementById('bc'
 const vel=new THREE.Vector3(),pos=car.position;let heading=0,thrust=0,boost=0,hp=100,score=0,shake=0,msg='',msgT=0;
 const START=new THREE.Vector3(-HALF+(N/2)*CELL+ROAD/2+2.3,0,30);
 function reset(){pos.copy(START);vel.set(0,0,0);heading=0;flight=false;hp=100}reset();
-window.game={scene,camera,keys,get state(){return{flight,pos:pos.clone(),score,hp,fps}},set flight(v){flight=v},set cam(v){camMode=v}};
+window.game={scene,camera,keys,get state(){return{flight,pos:pos.clone(),heading,score,hp,fps}},set flight(v){flight=v},set cam(v){camMode=v}};
 const GRAV=20,CEIL=600,carBox=new THREE.Box3(),hud=document.getElementById('hud'),flash=document.getElementById('flash'),clock=new THREE.Clock(),UP=new THREE.Vector3(0,1,0);
 let fps=60,fAcc=0,fN=0,lightT=0;
 function hit(dmg,text){hp=Math.max(0,hp-dmg);shake=Math.min(1,shake+dmg/20);flash.style.opacity=Math.min(.5,dmg/30);setTimeout(()=>flash.style.opacity=0,120);msg=text;msgT=1.5;if(hp<=0){msg='车辆损毁！按 R 重置';msgT=99}}
 function step(dt){
  const fwd=new THREE.Vector3(-Math.sin(heading),0,-Math.cos(heading)),speed=vel.dot(fwd);
- const steer=THREE.MathUtils.clamp((keys.KeyA?1:0)-(keys.KeyD?1:0)-joy.x,-1,1),acc=THREE.MathUtils.clamp((keys.KeyW?1:0)-(keys.KeyS?1:0)-joy.y,-1,1);
+ const steer=THREE.MathUtils.clamp((keys.KeyA||keys.ArrowLeft||keys.KeyQ?1:0)-(keys.KeyD||keys.ArrowRight||keys.KeyE?1:0)-joy.x,-1,1),acc=THREE.MathUtils.clamp((keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-joy.y,-1,1);
  const dead=hp<=0,grounded=pos.y<.05;
- heading+=steer*dt*(flight?1.4:1.9)*(flight?1:Math.min(1,Math.abs(speed)/6))*(speed<-.5&&!flight?-1:1);
+ heading+=steer*dt*(flight?1.6:1.9)*(flight?1:Math.max(.7,Math.min(1,Math.abs(speed)/6)))*(speed<-.5&&!flight?-1:1);
  if(!dead)vel.addScaledVector(fwd,acc*(flight?34:26)*dt);
  boost+=((acc>0&&!dead?1:0)-boost)*Math.min(1,dt*5);
- const upIn=(keys.Space?1:0)-(keys.ShiftLeft||keys.ShiftRight?1:0);
+ const upIn=(keys.Space?1:0)-(keys.ShiftLeft||keys.ShiftRight?1:0);if(upIn>0&&!flight&&!dead)flight=true;
  let lift=0;if(flight&&!dead)lift=GRAV+upIn*(upIn>0?85:30);
  thrust+=((flight&&!dead?.45+Math.max(0,lift-GRAV)/62*.55+(grounded&&upIn<=0?-.3:0):0)-thrust)*Math.min(1,dt*8);
  vel.y+=(lift-GRAV)*dt;
@@ -211,7 +213,7 @@ function step(dt){
  lightT+=dt;const ph=(lightT%16)<8;for(const t of tLights){const go=(t.ax==0)==ph;t.r.material=go?offM:redM;t.gr.material=go?greenM:offM}
  // camera
  const off=camMode==3?new THREE.Vector3(-6,1.8,-6.5):camMode==0?new THREE.Vector3(0,2.2,7.5):camMode==1?new THREE.Vector3(0,16,30):new THREE.Vector3(0,1.15,.1);
- off.applyAxisAngle(UP,heading);const target=pos.clone().add(off);
+ if(camMode!=2){off.applyAxisAngle(new THREE.Vector3(1,0,0),-orbP*.6);off.applyAxisAngle(UP,orbY)}off.applyAxisAngle(UP,heading);const target=pos.clone().add(off);
  if(camMode==2)camera.position.copy(target);else{camera.position.lerp(target,Math.min(1,dt*5));if(camera.position.y<.5)camera.position.y=.5}
  if(shake>0){camera.position.x+=rnd(-1,1)*shake*.4;camera.position.y+=rnd(-1,1)*shake*.4;shake=Math.max(0,shake-dt*2)}
  camera.lookAt(camMode==2?pos.clone().addScaledVector(fwd,30).setY(pos.y+1):pos.clone().setY(pos.y+.9));

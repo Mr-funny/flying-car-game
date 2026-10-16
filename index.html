@@ -8,10 +8,10 @@
 #knob{position:absolute;left:45px;top:45px;width:50px;height:50px;border-radius:50%;background:#fff8}
 #btns{position:fixed;right:24px;bottom:30px;display:none;flex-direction:column;gap:12px}
 #btns button{width:70px;height:56px;border-radius:12px;border:2px solid #fff6;background:#0007;color:#fff;font-size:15px}
-.touch #joy{display:block}.touch #btns{display:flex}.touch #help{display:none}</style>
+.touch #joy{display:block}.touch #btns{display:flex}.touch #help{display:none}.touch #thint{display:block!important}</style>
 <script type="importmap">{"imports":{"three":"./three.module.js","three/addons/":"./jsm/"}}</script></head>
 <body><div id="hud"></div><div id="flash"></div>
-<div id="help">WASD 驾驶/转向 · F 飞行 · Space 上升 · Shift 下降 · C 镜头 · R 重置</div>
-<div id="joy"><div id="knob"></div></div>
+<div id="help"><b>操作</b><br>W/S 或 ↑/↓ 前进/后退<br>A/D、←/→ 或 Q/E 原地转向（地面/空中都可）<br>Space 起飞上升（自动进入飞行）· Shift 下降<br>F 切换道路/飞行 · C 镜头 · R 重置<br>鼠标拖动 旋转视角 · 双击 复位</div>
+<div id="thint" style="position:fixed;left:0;right:0;bottom:180px;text-align:center;color:#fff;font-size:12px;opacity:.8;pointer-events:none;display:none" class="th">摇杆左右=转向 · 上下=前后 · ▲上升自动起飞 · 拖动屏幕转视角</div><div id="joy"><div id="knob"></div></div>
 <div id="btns"><button data-k="Space">▲ 上升</button><button data-k="ShiftLeft">▼ 下降</button><button id="bf">✈ 飞行</button><button id="bc">🎥</button></div>
 <script type="module" src="game.js"></script></body></html>
